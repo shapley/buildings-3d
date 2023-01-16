@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>OS Vector Tile API | 3D Buildings Example | Mapbox GL JS</title>
+    <link rel="stylesheet" href="https://labs.os.uk/public/os-api-branding/v0.2.0/os-api-branding.css">
+    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.1/mapbox-gl.css">
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+  
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:Project_x0020_or_x0020_Work_x0020_Area msdt:dt="string">28;#GIS and GeoSpatial|156db032-670c-4702-8511-0bdf69033a34</mso:Project_x0020_or_x0020_Work_x0020_Area>
+<mso:gd4168f1af1b43549eab634c6d3cea96 msdt:dt="string"></mso:gd4168f1af1b43549eab634c6d3cea96>
+<mso:Back_x0020_Office msdt:dt="string">29;#Map|5f3c4778-f918-4721-b4fb-f48250cdf57f</mso:Back_x0020_Office>
+<mso:dd1a6c04fc184eb7941c48c156fa3242 msdt:dt="string">Map|5f3c4778-f918-4721-b4fb-f48250cdf57f</mso:dd1a6c04fc184eb7941c48c156fa3242>
+<mso:Hardware msdt:dt="string"></mso:Hardware>
+<mso:Place_x0020_or_x0020_Area msdt:dt="string"></mso:Place_x0020_or_x0020_Area>
+<mso:dad768af094f45af9413a4024604b3da msdt:dt="string"></mso:dad768af094f45af9413a4024604b3da>
+<mso:TaxCatchAll msdt:dt="string">29;#Map|5f3c4778-f918-4721-b4fb-f48250cdf57f;#28;#GIS and GeoSpatial|156db032-670c-4702-8511-0bdf69033a34</mso:TaxCatchAll>
+<mso:f7270944116b48049de75907dcfc66a0 msdt:dt="string"></mso:f7270944116b48049de75907dcfc66a0>
+<mso:o525c545beb44babb91a89c914661813 msdt:dt="string">GIS and GeoSpatial|156db032-670c-4702-8511-0bdf69033a34</mso:o525c545beb44babb91a89c914661813>
+<mso:Service_x0020_Area msdt:dt="string"></mso:Service_x0020_Area>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Creator msdt:dt="string">Paul Shapley</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Creator>
+<mso:Creator msdt:dt="string">20</mso:Creator>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+  <body>
+    <div id="map"></div>
+    
+    <script src="https://labs.os.uk/public/os-api-branding/v0.2.0/os-api-branding.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.1/mapbox-gl.js"></script>
+    <script>
+
+    var apiKey = 'a4S0HorNC9kZNzWl8HERgMNXEsTA0iop';
+
+    var serviceUrl = 'https://api.os.uk/maps/vector/v1/vts';
+
+    // Initialize the map object.
+    var map = new mapboxgl.Map({
+        container: 'map',
+        minZoom: 6,
+        maxZoom: 18,
+        style: serviceUrl + '/resources/styles?key=' + apiKey,
+        maxBounds: [
+            [ -10.76418, 49.528423 ],
+            [ 1.9134116, 61.331151 ]
+        ],
+        center: [ -3.37987, 51.94324 ],
+        zoom: 50,
+        bearing: 270,
+        pitch: 90,
+        transformRequest: url => {
+            return {
+                url: url + '&srs=3857'
+            }
+        }
+    });
+
+    // Add navigation control to the map.
+    map.addControl(new mapboxgl.NavigationControl());
+
+    // Add event which waits for the style to be fully loaded.
+    map.on('style.load', function() {
+        // Duplicate 'OS/TopographicArea_1/Building/1' layer to extrude the buildings
+        // in 3D using the Building Height Attribute (RelHMax) value.
+        map.addLayer({
+            "id": "OS/TopographicArea_1/Building/1_3D",
+            "type": "fill-extrusion",
+            "source": "esri",
+            "source-layer": "TopographicArea_1",
+            "filter": [
+                "==",
+                "_symbol",
+                33
+            ],
+            "minzoom": 16,
+            "layout": {},
+            "paint": {
+                "fill-extrusion-color": "#DCD7C6",
+                "fill-extrusion-height": [
+                    "interpolate",
+                    [ "linear" ],
+                    [ "zoom" ],
+                    16,
+                    0,
+                    16.05,
+                    [ "get", "RelHMax" ]
+                ],
+                "fill-extrusion-opacity": 0.9
+            }
+        })
+    });
+
+</script>
+  </body>
+</html>
